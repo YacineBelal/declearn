@@ -23,7 +23,10 @@ Datasets
     Load and/or download a pre-processed UCI heart disease dataset.
 * [load_mnist][declearn.dataset.examples.load_mnist]:
     Load and/or download the MNIST digit-classification dataset.
+* [load_dreamt] [declearn.dataset.examples.load_dreamt]
+    Load and/or download the DREAMT polysomnography dataset.
 """
 
+from ._dreamt import load_dreamt
 from ._heart_uci import load_heart_uci
 from ._mnist import load_mnist
