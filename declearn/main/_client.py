@@ -105,6 +105,9 @@ class FederatedClient:
         # arguments serve modularity; pylint: disable=too-many-arguments
         # Assign the wrapped NetworkClient.
         self.netwk, replace_netwk_logger = self._parse_netwk(netwk)
+        # FIXME
+        # print(type(self.netwk))
+
         # Assign the logger and optionally replace that of the network client.
         if not isinstance(logger, logging.Logger):
             logger = get_logger(
@@ -690,7 +693,9 @@ class FederatedClient:
             path = os.path.join(self.ckptr.folder, "model_state_best.json")
             self.logger.info("Checkpointing final weights under %s.", path)
             assert self.trainmanager is not None  # for mypy
-            self.trainmanager.model.set_weights(message.weights)
+            self.trainmanager.model.set_weights(
+                message.weights, trainable=True
+            )
             self.ckptr.save_model(self.trainmanager.model, timestamp="best")
 
     async def cancel_training(

@@ -978,5 +978,5 @@ class FederatedServer:
         if self.ckptr:
             path = f"{self.ckptr.folder}/model_state_best.json"
             self.logger.info("Checkpointing final weights under %s.", path)
-            self.model.set_weights(message.weights)
+            self.model.set_weights(message.weights, trainable=True)
             self.ckptr.save_model(self.model, timestamp="best")
