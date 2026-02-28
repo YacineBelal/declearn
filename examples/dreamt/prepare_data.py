@@ -16,9 +16,7 @@ def prepare_dreamt(
         p_valid: float=0.2, 
         seed: Optional[int]= None,
 ) -> str:
-    
-
-    signals, labels, mean, std = load_dreamt(nb_clients, folder)
+    signals, labels = load_dreamt(nb_clients, folder)
   
     
     print(f"DREAMT is already splitted by client. This simulation samples {nb_clients} out of 100 client.")
