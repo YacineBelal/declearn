@@ -23,10 +23,6 @@ def prepare_dreamt(
     
     print(f"DREAMT is already splitted by client. This simulation samples {nb_clients} out of 100 client.")
 
-    
-    #TODO: could probably avoid loading csv files into npy and use csv ones directly
-    #TODO: we should perhaps add a splitting method that only splits into 
-    # train/val for datasets where clients are explicit  
     rng = np.random.default_rng(seed)
 
     split_data = [train_valid_split(signals[i], labels[i], p_valid, rng) for i in range(len(signals))]
