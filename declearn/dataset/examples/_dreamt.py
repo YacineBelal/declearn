@@ -11,10 +11,9 @@ def load_dreamt(nb_clients: int,
                 folder: Optional[str]= None):
 
     samples, labels = _load_dreamt(nb_clients, folder)
-    signals, labels, mean, std = _preprocess_into_signals(samples, labels)
+    signals, labels = _preprocess_into_signals(samples, labels)
 
-    return signals, labels, mean, std 
-
+    return signals, labels
 
 
 def _load_dreamt(
@@ -69,22 +68,15 @@ def _preprocess_into_signals(
         signals_preprocessed.append(X_p[:-1].reshape(-1, signal_len, 7))
         labels_preprocessed.append(y_p[:-1].reshape(-1, signal_len)[:,0])
 
-    signals_concat_all_clients = np.concat(signals_preprocessed, axis=0)
-    labels_concat_all_clients=  np.concat(labels_preprocessed, axis=0)
+    labels_concat_all_clients = np.concat(labels_preprocessed, axis=0)
     lb = LabelEncoder()
     lb.fit(labels_concat_all_clients)
-    #TODO: this could definitely be improved, we're regrouping data that should be
-    #collected
-    #Same questions for normalization 
+    # TODO: federated labelizer?
     labels_preprocessed_encoded = []
     for y_p in labels_preprocessed:
         labels_preprocessed_encoded.append(lb.transform(y_p))
 
-    mean = np.mean(signals_concat_all_clients, axis=(0,1))
-    std = np.std(signals_concat_all_clients, axis=(0,1))
-    
-
-    return signals_preprocessed, labels_preprocessed_encoded, mean, std 
+    return signals_preprocessed, labels_preprocessed_encoded
 
 
 
