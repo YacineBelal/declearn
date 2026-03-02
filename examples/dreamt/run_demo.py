@@ -13,7 +13,7 @@ with make_importable(os.path.dirname(__file__)):
 
 
 def run_demo(
-    nb_clients: int =20, 
+    nb_clients: int = 40,
     seed: Optional[int] = None,
 ) -> None:
     data_folder = prepare_dreamt(nb_clients, seed=seed)
