@@ -40,4 +40,8 @@ Data splitting
 
 from ._save_load import load_data_array, save_data_array
 from ._sparse import sparse_from_file, sparse_to_file
-from ._split_classif import split_multi_classif_dataset, train_valid_split
+from ._split_classif import (
+    aami_split,
+    split_multi_classif_dataset,
+    train_valid_split,
+)

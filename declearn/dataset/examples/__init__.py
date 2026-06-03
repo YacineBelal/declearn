@@ -29,4 +29,5 @@ Datasets
 
 from ._dreamt import load_dreamt
 from ._heart_uci import load_heart_uci
+from ._mitbih import load_mit_bih
 from ._mnist import load_mnist
