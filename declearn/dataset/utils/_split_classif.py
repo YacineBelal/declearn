@@ -18,6 +18,7 @@
 """Utils to split a multi-category classification dataset into shards."""
 
 import functools
+from dataclasses import dataclass
 from typing import Any, List, Literal, Optional, Tuple, Type, Union
 
 import numpy as np
@@ -243,3 +244,82 @@ def train_valid_split(
     train = inputs[order[v_len:]], target[order[v_len:]]
     valid = inputs[order[:v_len]], target[order[:v_len]]
     return train, valid
+
+
+@dataclass
+class DataSplit:
+    train: np.ndarray
+    test: np.ndarray
+    val: np.ndarray | None = None
+
+    @property
+    def is_final(self):
+        return self.val is None
+
+
+def aami_split():
+    """
+    Split patient records following the AAMI EC57 standard (DS1/DS2).
+    DS1 is train, DS2 is test. In design mode a validation set is carved
+    out of DS1.
+
+    Returns
+    -------
+    design : DataSplit(train, val, test)
+    final  : DataSplit(train, test)
+    """
+
+    DS1 = {
+        "101",
+        "106",
+        "108",
+        "109",
+        "112",
+        "114",
+        "115",
+        "116",
+        "118",
+        "119",
+        "122",
+        "124",
+        "201",
+        "203",
+        "205",
+        "207",
+        "208",
+        "209",
+        "215",
+        "220",
+        "223",
+        "230",
+    }
+
+    DS2 = {
+        "100",
+        "103",
+        "105",
+        "111",
+        "113",
+        "117",
+        "121",
+        "123",
+        "200",
+        "202",
+        "210",
+        "212",
+        "213",
+        "214",
+        "219",
+        "221",
+        "222",
+        "228",
+        "231",
+        "232",
+        "233",
+        "234",
+    }
+
+    train_records = np.array(sorted(DS1))
+    test_records = np.array(sorted(DS2))
+
+    return DataSplit(train=train_records, test=test_records)
