@@ -27,7 +27,7 @@ def run_server(
     metrics = declearn.metrics.MetricSet(
         [
             declearn.metrics.MulticlassAccuracyPrecisionRecall(
-                labels=range(3)
+                labels=range(3)  # 0:'N', 1:'S', 2:'V'
             ),
         ]
     )    
@@ -40,8 +40,8 @@ def run_server(
     )
 
     model = declearn.model.torch.TorchModel(
-        model = CNN(),
-        loss = torch.nn.CrossEntropyLoss() #TODO: add weighted loss based on train imbalance
+        model=CNN(),
+        loss=torch.nn.CrossEntropyLoss(),  # TODO: add weighted loss based on train imbalance
     )
 
 

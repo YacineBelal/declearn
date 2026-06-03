@@ -51,9 +51,12 @@ def _ensure_downloaded(folder: Optional[str]) -> None:
     logger.info("Download complete.")
 
 
-def load_mit_bih(folder: Optional[str]= None, window_len = 64, mode="design"):
-    assert mode in ("design", "final"), f"mode must be 'design' or 'final', got {repr(mode)}"
-
+def load_mit_bih(
+    folder: str,
+    window_len: int = 64,
+) -> tuple[
+    dict[str, np.ndarray], dict[str, np.ndarray], dict[str, np.ndarray]
+]:
     _ensure_downloaded(folder)
     X_all, y_all, RR_all = _load_mit_bih(folder, window_len)
     
@@ -68,20 +71,28 @@ def load_mit_bih(folder: Optional[str]= None, window_len = 64, mode="design"):
 
 
 
-def _load_mit_bih(folder: Optional[str]= None, window_len = 64, extension="atr"):
+def _load_mit_bih(folder: str, window_len=64, extension="atr"):
     PACED_RECORDS = {'102', '104', '107', '217'}
     files = [f for f in Path(folder).iterdir() if f.is_file() and f.suffix == ".hea"]
     y_all = {}
     X_all = {}
     RR_all = {}
 
-    half_window_len = window_len // 2 
-    AAMI_MAP = {"N":"N", "L":"N", "R":"N", "e":"N", "j":"N", 
-                            "A":"S", "a":"S", "S":"S", "J":"S", 
-                            "V":"V", "E":"V", 
-                            #"F":"F", #Removed F and Q as there are not relevant to arrhythmia detection  
-                            # "/":'Q', "f": "Q", "Q":"Q",
-                            }
+    half_window_len = window_len // 2
+    # Removed F and Q as there are not relevant to arrhythmia detection
+    AAMI_MAP = {
+        "N": "N",
+        "L": "N",
+        "R": "N",
+        "e": "N",
+        "j": "N",
+        "A": "S",
+        "a": "S",
+        "S": "S",
+        "J": "S",
+        "V": "V",
+        "E": "V",
+    }
 
     beat_symbols = list(AAMI_MAP.keys())
 
@@ -106,7 +117,9 @@ def _load_mit_bih(folder: Optional[str]= None, window_len = 64, extension="atr")
             elif in_flutter:
                 in_flutter_indices.add(i)
 
-        valid_beats = [] 
+        valid_beats: list[
+            tuple[int, int, str]
+        ] = []  # annot_idx, sample_idx, aami_label
         for i , sample_idx in enumerate(annotation.sample):
             if annotation.symbol[i] not in beat_symbols:
                 continue 
@@ -127,6 +140,8 @@ def _load_mit_bih(folder: Optional[str]= None, window_len = 64, extension="atr")
 
             x.append(clean_signal[sample_idx-half_window_len:sample_idx+half_window_len])
             y.append(label)
+
+            # RR features: pre-RR, post-RR, pre/post ratio, local mean RR (5-beat window)
             rr.append([pre_rr, post_rr, ratio, local_mean_rr])
 
 
@@ -149,13 +164,13 @@ def _preprocess_ecg(signal: np.ndarray) -> np.ndarray:
     4. Moving average -> smooth
     """
     hp = firwin(57, cutoff=0.5, window=('kaiser', 8.6), pass_zero=False, fs=FS)
-    signal = filtfilt(hp, 1.0, signal)
+    signal = filtfilt(hp, [1.0], signal)
 
     bs = firwin(57, cutoff=[59.5, 60.5], window=('kaiser', 8.6), pass_zero=True, fs=FS)
-    signal = filtfilt(bs, 1.0, signal)
+    signal = filtfilt(bs, [1.0], signal)
 
     lp = firwin(57, cutoff=100.0, window=('kaiser', 8.6), pass_zero=True, fs=FS)
-    signal = filtfilt(lp, 1.0, signal)
+    signal = filtfilt(lp, [1.0], signal)
 
     kernel = np.ones(5) / 5
     signal = np.convolve(signal, kernel, mode='same')

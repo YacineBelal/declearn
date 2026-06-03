@@ -1,5 +1,4 @@
 import os
-from typing import Optional
 
 import fire
 
@@ -13,8 +12,7 @@ with make_importable(os.path.dirname(__file__)):
 
 
 def run_demo(
-    nb_clients: int = 22,
-    seed: Optional[int] = None,
+    nb_clients: int = 22,  # Note that this number matches the AAMI dataset split, which results in 22 training clients.
 ) -> None:
     data_folder = prepare_mitbih()
     server = (run_server, {"nb_clients": nb_clients})
@@ -23,11 +21,10 @@ def run_demo(
         "verbose": False
     }
     clients = [
-        (run_client, 
-        (f"client_{idx}",), client_kwargs) 
+        (run_client, (f"client_{idx}",), client_kwargs)
         for idx in range(nb_clients)
-    ] 
- 
+    ]
+
     success, outp = run_as_processes(server, *clients)
     if not success:
             raise RuntimeError(

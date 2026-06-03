@@ -54,7 +54,7 @@ class CNN(nn.Module):
                 nn.init.ones_(layer.weight)
                 nn.init.zeros_(layer.bias)
 
-    def forward(self, X, rr):
+    def forward(self, X: torch.Tensor, rr: torch.Tensor) -> torch.Tensor:
         out = self.convolutions(X)
         out = out.permute(0, 2, 1)
         attn_out, _ = self.attention(out, out, out)

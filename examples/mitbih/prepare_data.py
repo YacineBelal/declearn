@@ -17,12 +17,14 @@ def prepare_mitbih(
     X_all, y_all, RR_all  = load_mit_bih(folder)
     
     splits = aami_split()
+    # full test set shared between all clients. related TODO: override FederatedServer to only evaluate one client at the end (global model)
     X_test = np.concatenate([X_all[i] for i in splits.test])
     y_test = np.concatenate([y_all[i] for i in splits.test])
     RR_test = np.concatenate([RR_all[i] for i in splits.test])
 
 
     folder = os.path.join(folder,"mit-bih-aami")
+
 
     #TODO: add normalization before storing
     for client_id, patient_id in enumerate(splits.train):
