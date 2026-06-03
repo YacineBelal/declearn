@@ -212,10 +212,12 @@ class MulticlassAccuracyPrecisionRecall(Metric[ClassifConfmat]):
         pred = confmat.sum(axis=0)  # label-wise number of predictions
         true = confmat.sum(axis=1)  # label-wise number of labels (support)
         with np.errstate(invalid="ignore"):
+            per_class_recall = diag / true
             scores = {
                 "accuracy": diag.sum() / confmat.sum(),
+                "balanced_accuracy": float(np.nanmean(per_class_recall)),
                 "precision": diag / pred,
-                "recall": diag / true,
+                "recall": per_class_recall,
                 "f-score": 2 * diag / (pred + true),
             }
         # Convert NaNs resulting from zero-division to zero.
