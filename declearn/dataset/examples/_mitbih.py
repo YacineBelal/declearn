@@ -1,14 +1,15 @@
 import logging
+from math import gcd
 from pathlib import Path
 from typing import Optional
 
 import numpy as np
 import wfdb
-from scipy.signal import filtfilt, firwin
+from scipy.signal import filtfilt, firwin, resample_poly
 
 logger = logging.getLogger(__name__)
 
-FS = 360 
+FS = 360  # sampling frequency
 
 # All records required by the AAMI EC57 split (DS1 ∪ DS2).
 _AAMI_RECORDS = [
@@ -18,6 +19,22 @@ _AAMI_RECORDS = [
     "213", "214", "215", "219", "220", "221", "222", "223", "228", "230",
     "231", "232", "233", "234",
 ]
+
+AAMI_MAP = {
+    "N": "N",
+    "L": "N",
+    "R": "N",
+    "e": "N",
+    "j": "N",
+    "A": "S",
+    "a": "S",
+    "S": "S",
+    "J": "S",
+    "V": "V",
+    "E": "V",
+    # "F":"F", #Removed F and Q as there are not relevant to arrhythmia detection
+    # "/":'Q', "f": "Q", "Q":"Q",
+}
 
 
 def _ensure_downloaded(folder: Optional[str]) -> None:
@@ -54,11 +71,18 @@ def _ensure_downloaded(folder: Optional[str]) -> None:
 def load_mit_bih(
     folder: str,
     window_len: int = 64,
+    preprocess: bool = False,
+    target_frequency: Optional[int] = None,
 ) -> tuple[
-    dict[str, np.ndarray], dict[str, np.ndarray], dict[str, np.ndarray]
+    dict[str, np.ndarray],
+    dict[str, np.ndarray],
+    dict[str, np.ndarray],
+    dict[str, np.ndarray],
 ]:
     _ensure_downloaded(folder)
-    X_all, y_all, RR_all = _load_mit_bih(folder, window_len)
+    X_all, y_all, SYM_all, RR_all = _load_mit_bih(
+        folder, window_len, preprocess, target_frequency
+    )
     
     classes_n = np.unique(np.concatenate(list(y_all.values()), axis=0))
     label_encoder = {val: idx for idx, val in enumerate(classes_n)}
@@ -66,92 +90,148 @@ def load_mit_bih(
     for patient, patient_labels in y_all.items():
         y_all_encoded[patient] = np.array([label_encoder[val] for val in patient_labels])
 
-
-    return X_all, y_all_encoded, RR_all
-
+    return X_all, y_all_encoded, SYM_all, RR_all
 
 
-def _load_mit_bih(folder: str, window_len=64, extension="atr"):
+
+def _load_mit_bih(
+    folder: str,
+    window_len: int,
+    preprocess: bool,
+    target_frequency: Optional[int] = None,
+    extension: str = "atr",
+):
     PACED_RECORDS = {'102', '104', '107', '217'}
     files = [f for f in Path(folder).iterdir() if f.is_file() and f.suffix == ".hea"]
     y_all = {}
     X_all = {}
+    SYM_all = {}
     RR_all = {}
 
+    if target_frequency is not None:
+        g = gcd(FS, target_frequency)
+        up = target_frequency // g
+        down = FS // g
+    else:
+        target_frequency = FS
+
     half_window_len = window_len // 2
-    # Removed F and Q as there are not relevant to arrhythmia detection
-    AAMI_MAP = {
-        "N": "N",
-        "L": "N",
-        "R": "N",
-        "e": "N",
-        "j": "N",
-        "A": "S",
-        "a": "S",
-        "S": "S",
-        "J": "S",
-        "V": "V",
-        "E": "V",
-    }
-
     beat_symbols = list(AAMI_MAP.keys())
-
-
 
     for f in files:
         if f.stem in PACED_RECORDS:
             continue
 
-        record = wfdb.rdrecord(record_name=f.with_suffix(''))
-        annotation = wfdb.rdann(record_name=str(f.with_suffix('')), extension=extension)
-        
-        clean_signal = _preprocess_ecg(record.p_signal[:, 0])
+        record = wfdb.rdrecord(record_name=f.with_suffix(""))
+        annotation = wfdb.rdann(
+            record_name=str(f.with_suffix("")), extension=extension
+        )
 
-        in_flutter = False 
+        if target_frequency != FS:
+            resampled_signal = resample_poly(record.p_signal[:, 0], up, down)
+        else:
+            resampled_signal = record.p_signal[:, 0]
+
+        clean_signal = (
+            _preprocess_ecg(record.p_signal[:, 0])
+            if preprocess
+            else resampled_signal
+        )
+        resampled_sig_len = len(clean_signal)
+        resampled_samples = np.round(
+            np.array(annotation.sample) * (target_frequency / FS)
+        ).astype(int)
+
+        in_flutter = False
         in_flutter_indices = set()
         for i, sym in enumerate(annotation.symbol):
-            if sym == '[':
-                in_flutter = True 
-            elif sym == ']':
-                in_flutter = False 
+            if sym == "[":
+                in_flutter = True
+            elif sym == "]":
+                in_flutter = False
             elif in_flutter:
                 in_flutter_indices.add(i)
 
-        valid_beats: list[
-            tuple[int, int, str]
-        ] = []  # annot_idx, sample_idx, aami_label
-        for i , sample_idx in enumerate(annotation.sample):
+        valid_beats = []
+        for i, sample_idx in enumerate(resampled_samples):
             if annotation.symbol[i] not in beat_symbols:
-                continue 
+                continue
             if i in in_flutter_indices:
-                continue 
-            if  sample_idx-half_window_len < 0 or sample_idx+half_window_len > record.sig_len:
-                continue  
-            
+                continue
+            if (
+                sample_idx - half_window_len < 0
+                or sample_idx + half_window_len > resampled_sig_len
+            ):
+                continue
+
             valid_beats.append((i, sample_idx, AAMI_MAP[annotation.symbol[i]]))
-       
-        x, y, rr = [], [], []
-        
+
+        x, y, sym, rr = [], [], [], []
+
         for pos, (i, sample_idx, label) in enumerate(valid_beats):
-            pre_rr  = (valid_beats[pos][1] - valid_beats[pos-1][1]) / FS if pos > 0 else 0.0
-            post_rr = (valid_beats[pos+1][1] - valid_beats[pos][1]) / FS if pos < len(valid_beats)-1 else 0.0
-            local_mean_rr = np.mean(np.diff([b[1] for b in valid_beats[max(0, pos-5):pos+1]])) / FS if pos > 0 else pre_rr
-            ratio = pre_rr / post_rr if post_rr > 0 else 1.0
+            pre_rr = (
+                (valid_beats[pos][1] - valid_beats[pos - 1][1])
+                / target_frequency
+                if pos > 0
+                else 0.0
+            )
+            post_rr = (
+                (valid_beats[pos + 1][1] - valid_beats[pos][1])
+                / target_frequency
+                if pos < len(valid_beats) - 1
+                else 0.0
+            )
+            local_mean_rr = (
+                np.mean(
+                    np.diff(
+                        [b[1] for b in valid_beats[max(0, pos - 80) : pos + 1]]
+                    )
+                )
+                / target_frequency
+                if pos > 0
+                else pre_rr
+            )
+            global_mean_rr = (
+                np.mean(
+                    np.diff(
+                        [
+                            b[1]
+                            for b in valid_beats[max(0, pos - 400) : pos + 1]
+                        ]
+                    )
+                )
+                / target_frequency
+                if pos > 0
+                else pre_rr
+            )
 
-            x.append(clean_signal[sample_idx-half_window_len:sample_idx+half_window_len])
+            pre_rr_local = pre_rr / local_mean_rr if local_mean_rr > 0 else 1.0
+            post_rr_local = (
+                post_rr / local_mean_rr if local_mean_rr > 0 else 1.0
+            )
+            pre_rr_global = (
+                pre_rr / global_mean_rr if global_mean_rr > 0 else 1.0
+            )
+            post_rr_global = (
+                post_rr / global_mean_rr if global_mean_rr > 0 else 1.0
+            )
+            rr.append(
+                [pre_rr_local, post_rr_local, pre_rr_global, post_rr_global]
+            )
+
+            seg = clean_signal[
+                sample_idx - half_window_len : sample_idx + half_window_len
+            ]
+            x.append(seg)
             y.append(label)
-
-            # RR features: pre-RR, post-RR, pre/post ratio, local mean RR (5-beat window)
-            rr.append([pre_rr, post_rr, ratio, local_mean_rr])
-
+            sym.append(annotation.symbol[i])
 
         X_all[f.stem] = np.expand_dims(np.stack(x), axis=1).astype("float32")
-        # X_all[f.stem] = np.permute_dims(np.stack(x), axes=(0,2,1)).astype("float32")
         y_all[f.stem] = np.array(y)
+        SYM_all[f.stem] = np.array(sym)
         RR_all[f.stem] = np.array(rr, dtype="float32")
 
-
-    return X_all, y_all, RR_all
+    return X_all, y_all, SYM_all, RR_all
 
 
 
