@@ -8,6 +8,7 @@ from model import CNN
 
 import declearn
 import declearn.model.torch
+from declearn.dataset.utils import load_data_array
 from declearn.optimizer.modules import (
     ScaffoldClientModule,
     ScaffoldServerModule,
@@ -39,9 +40,23 @@ def run_server(
         fpath=os.path.join(checkpoint, "logs.txt"),
     )
 
+    weights = load_data_array(
+        os.path.join(FILEDIR, "data", "mit-bih-aami", "class_weights.npy")
+    )
+
+    matched_filters = load_data_array(
+        os.path.join(FILEDIR, "data", "mit-bih-aami", "matched_filters.npy")
+    )
+    weights = torch.from_numpy(weights)
     model = declearn.model.torch.TorchModel(
         model=CNN(),
-        loss=torch.nn.CrossEntropyLoss(),  # TODO: add weighted loss based on train imbalance
+        loss=torch.nn.CrossEntropyLoss(
+            weight=weights.to(
+                torch.device("cuda")
+                if declearn.utils.get_device_policy().gpu
+                else "cpu"
+            )
+        ),  # TODO: add weighted loss based on train imbalance
     )
 
 
