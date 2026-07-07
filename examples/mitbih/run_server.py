@@ -4,7 +4,7 @@ import os
 
 import fire
 import torch
-from model import CNN
+from model import tinyCNN
 
 import declearn
 import declearn.model.torch
@@ -49,7 +49,7 @@ def run_server(
     )
     weights = torch.from_numpy(weights)
     model = declearn.model.torch.TorchModel(
-        model=CNN(),
+        model=tinyCNN(matched_filters=matched_filters, trainable_conv=True),
         loss=torch.nn.CrossEntropyLoss(
             weight=weights.to(
                 torch.device("cuda")
