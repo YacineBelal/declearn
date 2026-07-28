@@ -10,6 +10,7 @@ import declearn
 import declearn.model.torch
 from declearn.dataset.utils import load_data_array
 from declearn.optimizer.modules import (
+    AdamModule,
     ScaffoldClientModule,
     ScaffoldServerModule,
 )
@@ -102,19 +103,20 @@ def run_server(
     training = declearn.main.config.TrainingConfig(
         batch_size=128,
         n_epoch=1,
+        shuffle=True,
     )
 
     evaluate = declearn.main.config.EvaluateConfig(
-        batch_size=128,
+        batch_size=1024,
+        shuffle=False,
+        frequency=10,
     )
 
     run_config = declearn.main.config.FLRunConfig.from_params(
-        rounds=20,  # you may change the number of training rounds
+        rounds=2000,
         register=register,
         training=training,
         evaluate=evaluate,
-        privacy=None,  # you may set up local DP (DP-SGD) here
-        early_stop=None,  # you may add an early-stopping criterion here
     )
     server.run(run_config)    
 
