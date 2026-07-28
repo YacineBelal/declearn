@@ -44,7 +44,6 @@ def run_client(
         information.
     """
 
-
     declearn.utils.set_device_policy(gpu=True)
 
     stamp = datetime.datetime.now().strftime("%y-%m-%d_%H-%M")
@@ -54,27 +53,19 @@ def run_client(
         level=logging.INFO,
         fpath=os.path.join(checkpoint, "logs.txt"),
     )
-
-
-    
     data_folder = os.path.join(FILEDIR, data_folder, client_name)
 
-    X_train = load_data_array(os.path.join(data_folder,"train_data.npy"))
+    X_train = load_data_array(os.path.join(data_folder, "train_data.npy"))
     RR_train = load_data_array(os.path.join(data_folder, "train_arr.npy"))
     y_train = load_data_array(os.path.join(data_folder, "train_target.npy"))
 
     torch_dataset = MitbihDataset(X_train, RR_train, y_train)
-    train = TorchDataset(torch_dataset)
-    
-
-    X_test = load_data_array(os.path.join(data_folder,"valid_data.npy"))
+    train = TorchDataset(torch_dataset, seed=42)
+    X_test = load_data_array(os.path.join(data_folder, "valid_data.npy"))
     RR_test = load_data_array(os.path.join(data_folder, "valid_arr.npy"))
     y_test = load_data_array(os.path.join(data_folder, "valid_target.npy"))
-
-    
     torch_dataset_valid = MitbihDataset(X_test, RR_test, y_test)
     valid = TorchDataset(torch_dataset_valid)
-    
 
     network = declearn.communication.build_client(
         protocol=protocol,
