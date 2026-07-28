@@ -16,7 +16,7 @@ class tinyCNN(nn.Module):
         whether to train the conv layer initialized with the matched_filters.
     """
 
-    def __init__(self, matched_filters, trainable_conv=True):
+    def __init__(self, matched_filters, trainable_conv=True, seed=42):
         super().__init__()
         mf = torch.as_tensor(matched_filters, dtype=torch.float32)
         if not trainable_conv:
@@ -42,9 +42,11 @@ class tinyCNN(nn.Module):
 
         self.merger = nn.Sequential(nn.Linear(n_filters + 8, 3))
 
-        self._init_weights()
+        self._init_weights(seed)
 
-    def _init_weights(self):
+    def _init_weights(self, seed):
+        torch.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
         for layer in self.modules():
             if isinstance(layer, nn.Linear):
                 nn.init.kaiming_normal_(layer.weight)

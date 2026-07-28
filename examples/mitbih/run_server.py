@@ -18,10 +18,10 @@ from declearn.utils import config_server_loggers
 FILEDIR = os.path.dirname(os.path.abspath(__file__))
 
 def run_server(
-   nb_clients: int,
-   protocol: str="websockets",
-   host: str = "localhost",
-   port: int = 8765,   
+    nb_clients: int,
+    protocol: str = "websockets",
+    host: str = "localhost",
+    port: int = 8765,
 ) -> None: 
     
     declearn.utils.set_device_policy(gpu=True)
@@ -47,31 +47,28 @@ def run_server(
     matched_filters = load_data_array(
         os.path.join(FILEDIR, "data", "mit-bih-aami", "matched_filters.npy")
     )
+
     weights = torch.from_numpy(weights)
     model = declearn.model.torch.TorchModel(
-        model=tinyCNN(matched_filters=matched_filters, trainable_conv=True),
-        loss=torch.nn.CrossEntropyLoss(
-            weight=weights.to(
-                torch.device("cuda")
-                if declearn.utils.get_device_policy().gpu
-                else "cpu"
-            )
-        ),  # TODO: add weighted loss based on train imbalance
+        model=tinyCNN(
+            matched_filters=matched_filters, trainable_conv=True, seed=42
+        ),
+        loss=torch.nn.CrossEntropyLoss(),
     )
-
 
     aggregator = declearn.aggregator.AveragingAggregator(steps_weighted=False)
 
     server_opt = declearn.optimizer.Optimizer(
-        lrate=1.0,
+        lrate=5e-4,
         w_decay=0.0,
-        modules=[ScaffoldServerModule()],
+        modules=[AdamModule(), ScaffoldServerModule()],
+        regularizers=[],
     )
 
     client_opt = declearn.optimizer.Optimizer(
-        lrate=0.0002,
+        lrate=1e-3,
         w_decay=0.0,
-        regularizers=None,
+        regularizers=[],
         modules=[ScaffoldClientModule()],
     )
 
