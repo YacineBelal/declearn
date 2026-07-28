@@ -55,7 +55,7 @@ class tinyCNN(nn.Module):
                 nn.init.ones_(layer.weight)
                 nn.init.zeros_(layer.bias)
 
-    def forward(self, X, rr):
+    def forward(self, X: torch.Tensor, rr: torch.Tensor):
         conv_out = nn.functional.conv1d(
             input=X, weight=self.mf, padding="same"
         )
