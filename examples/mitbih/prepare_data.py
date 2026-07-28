@@ -26,7 +26,7 @@ AAMI_MAP = {
 def prepare_mitbih(
         folder: str=DATADIR,
 ) -> str:
-    X_all, y_all, SYM_all, RR_all = load_mit_bih(folder)
+    X_all, y_all, SYM_all, RR_all = load_mit_bih(folder, target_frequency=128)
     
     splits = aami_split()
     # full test set shared between all clients. related TODO: override FederatedServer to only evaluate one client at the end (global model)
@@ -53,7 +53,8 @@ def prepare_mitbih(
 
     n_classes = len(np.unique(y_train_all))
     class_weights = len(y_train_all) / (n_classes * np.bincount(y_train_all))
-    np.save(
+
+    save_data_array(
         os.path.join(folder, "class_weights.npy"),
         class_weights.astype("float32"),
     )

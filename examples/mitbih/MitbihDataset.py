@@ -15,14 +15,19 @@ class MitbihDataset(Dataset):
         self.x = torch.as_tensor(X, dtype=torch.float32)
         self.rr = torch.as_tensor(RR, dtype=torch.float32)
         self.y = torch.as_tensor(y, dtype=torch.long)
+        n_classes = torch.unique(self.y).numel()
+        self.weights = self.y.size(0) / (n_classes * torch.bincount(self.y))
         self.deriv_x = torch.diff(self.x, dim=-1, prepend=self.x[..., :1])
         self.get_deriv = get_deriv
 
     def __getitem__(self, index):
         return (
-            self.deriv_x[index] if self.get_deriv else self.x[index],
-            self.rr[index],
+            [
+                self.deriv_x[index] if self.get_deriv else self.x[index],
+                self.rr[index],
+            ],
             self.y[index],
+            self.weights[self.y[index]],
         )
 
     def __len__(self):
