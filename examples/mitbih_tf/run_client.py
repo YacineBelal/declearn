@@ -21,10 +21,15 @@ DEFAULT_CERT = os.path.join(FILEDIR, "ca-cert.pem")
 def prepare_data(X, rr, y):
     n_classes = np.unique(y).size
     n_samples = y.shape[0]
-    weights = n_samples / n_classes * np.bincount(y)
-
+    weights = load_data_array(
+        os.path.join(FILEDIR, "data", "mit-bih-aami", "class_weights.npy")
+    )
+    # n_samples / n_classes * np.bincount(y)
     deriv_x = np.diff(X, axis=-1, prepend=X[..., :1])
-    dataset = tf.data.Dataset.from_tensor_slices(((deriv_x, rr), y))
+    dataset = tf.data.Dataset.from_tensor_slices(
+        # ((deriv_x, rr), y, weights[y])
+        ((deriv_x, rr), y, weights[y])
+    )
 
     return dataset, weights 
 
