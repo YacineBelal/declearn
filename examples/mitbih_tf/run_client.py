@@ -17,22 +17,6 @@ from declearn.utils import config_client_loggers
 FILEDIR = os.path.dirname(os.path.abspath(__file__))
 DEFAULT_CERT = os.path.join(FILEDIR, "ca-cert.pem")
 
-#TODO: This is a temporary helper for test purposes. It shouldn't live here 
-def prepare_data(X, rr, y):
-    n_classes = np.unique(y).size
-    n_samples = y.shape[0]
-    weights = load_data_array(
-        os.path.join(FILEDIR, "data", "mit-bih-aami", "class_weights.npy")
-    )
-    # n_samples / n_classes * np.bincount(y)
-    deriv_x = np.diff(X, axis=-1, prepend=X[..., :1])
-    dataset = tf.data.Dataset.from_tensor_slices(
-        # ((deriv_x, rr), y, weights[y])
-        ((deriv_x, rr), y, weights[y])
-    )
-
-    return dataset, weights 
-
 def run_client(
     client_name: str,
     data_folder: str,
@@ -69,18 +53,39 @@ def run_client(
         level=logging.INFO,
         fpath=os.path.join(checkpoint, "logs.txt"),
     )
+
+    weights = load_data_array(
+        os.path.join(
+            FILEDIR,
+            data_folder,
+            "class_weights.npy",
+        )
+    )
+
     data_folder = os.path.join(FILEDIR, data_folder, client_name)
 
     X_train = load_data_array(os.path.join(data_folder, "train_data.npy"))
     RR_train = load_data_array(os.path.join(data_folder, "train_arr.npy"))
     y_train = load_data_array(os.path.join(data_folder, "train_target.npy"))
 
-    tf_dataset, weights = prepare_data(X_train, RR_train, y_train)
-    train = TensorflowDataset(tf_dataset, seed=42)
+    X_train_deriv = np.diff(
+        X_train, prepend=X_train[..., :1], axis=-1
+    )  # TODO: should be made optional somewhere else
+
+    tf_dataset_train = tf.data.Dataset.from_tensor_slices(
+        ((X_train_deriv, RR_train), y_train, weights[y_train])
+    )
+
+    train = TensorflowDataset(tf_dataset_train, seed=42)
     X_test = load_data_array(os.path.join(data_folder, "valid_data.npy"))
     RR_test = load_data_array(os.path.join(data_folder, "valid_arr.npy"))
     y_test = load_data_array(os.path.join(data_folder, "valid_target.npy"))
-    tf_dataset_valid, _ = prepare_data(X_test, RR_test, y_test)
+
+    X_test_deriv = np.diff(X_test, prepend=X_test[..., :1], axis=-1)
+
+    tf_dataset_valid = tf.data.Dataset.from_tensor_slices(
+        ((X_test_deriv, RR_test), y_test, weights[y_test])
+    )
     valid = TensorflowDataset(tf_dataset_valid)
 
     network = declearn.communication.build_client(
