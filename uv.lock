@@ -821,9 +821,12 @@ dependencies = [
     { name = "cryptography" },
     { name = "fire" },
     { name = "gmpy2" },
+    { name = "keras" },
     { name = "pandas" },
     { name = "requests" },
     { name = "scikit-learn" },
+    { name = "tensorflow" },
+    { name = "tflite" },
     { name = "tqdm" },
     { name = "wfdb" },
 ]
@@ -945,6 +948,7 @@ requires-dist = [
     { name = "ipython", marker = "extra == 'dev'", specifier = ">=9.8.0" },
     { name = "jax", extras = ["cpu"], marker = "extra == 'all'", specifier = "~=0.8" },
     { name = "jax", extras = ["cpu"], marker = "extra == 'haiku'", specifier = "~=0.8" },
+    { name = "keras", specifier = "~=3.15.0" },
     { name = "mkdocs-autorefs", marker = "extra == 'dev'", specifier = "~=0.4" },
     { name = "mkdocs-autorefs", marker = "extra == 'docs'", specifier = "~=0.4" },
     { name = "mkdocs-literate-nav", marker = "extra == 'dev'", specifier = "~=0.4" },
@@ -971,8 +975,10 @@ requires-dist = [
     { name = "ruff", marker = "extra == 'dev'", specifier = "~=0.14" },
     { name = "ruff", marker = "extra == 'tests'", specifier = "~=0.14" },
     { name = "scikit-learn", specifier = "~=1.6" },
+    { name = "tensorflow", specifier = ">=2.20.0" },
     { name = "tensorflow", marker = "extra == 'all'", specifier = "~=2.12" },
     { name = "tensorflow", marker = "extra == 'tensorflow'", specifier = "~=2.12" },
+    { name = "tflite", specifier = ">=2.18.0" },
     { name = "torch", marker = "extra == 'all'", specifier = "~=2.0" },
     { name = "torch", marker = "extra == 'torch'", specifier = "~=2.0" },
     { name = "tox", marker = "extra == 'dev'", specifier = "~=4.31" },
@@ -1796,7 +1802,7 @@ wheels = [
 
 [[package]]
 name = "keras"
-version = "3.12.0"
+version = "3.15.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "absl-py" },
@@ -1808,9 +1814,9 @@ dependencies = [
     { name = "packaging" },
     { name = "rich" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/9b/b8/8df141314a64a31d3a21762658826f716cdf4c261c7fcdb3f729958def55/keras-3.12.0.tar.gz", hash = "sha256:536e3f8385a05ae04e82e08715a1a59988578087e187b04cb0a6fad11743f07f", size = 1129187, upload-time = "2025-10-27T20:23:11.574Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/02/0a/c2524cda024e5b24038726de899c4b0ae2603dd0324a30cbc129d6b6314e/keras-3.15.0.tar.gz", hash = "sha256:0123749ac2a704d63f691994b18e432e006cb8ae910cc0ea7035d777aed9c00d", size = 1326815, upload-time = "2026-06-24T23:17:12.332Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ba/61/cc8be27bd65082440754be443b17b6f7c185dec5e00dfdaeab4f8662e4a8/keras-3.12.0-py3-none-any.whl", hash = "sha256:02b69e007d5df8042286c3bcc2a888539e3e487590ffb08f6be1b4354df50aa8", size = 1474424, upload-time = "2025-10-27T20:23:09.571Z" },
+    { url = "https://files.pythonhosted.org/packages/d4/16/d506c09bbff25927a65d13c542cb4eedc2d573e304f38b6ac3f49ed6be9b/keras-3.15.0-py3-none-any.whl", hash = "sha256:9bbd7df12b7b53500d00dc24d97b7e066c771260482cb7118de0b7687a7a2781", size = 1696954, upload-time = "2026-06-24T23:17:10.808Z" },
 ]
 
 [[package]]
@@ -4339,6 +4345,19 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/87/56/ab275c2b56a5e2342568838f0d5e3e66a32354adcc159b495e374cda43f5/termcolor-3.2.0.tar.gz", hash = "sha256:610e6456feec42c4bcd28934a8c87a06c3fa28b01561d46aa09a9881b8622c58", size = 14423, upload-time = "2025-10-25T19:11:42.586Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f9/d5/141f53d7c1eb2a80e6d3e9a390228c3222c27705cbe7f048d3623053f3ca/termcolor-3.2.0-py3-none-any.whl", hash = "sha256:a10343879eba4da819353c55cb8049b0933890c2ebf9ad5d3ecd2bb32ea96ea6", size = 7698, upload-time = "2025-10-25T19:11:41.536Z" },
+]
+
+[[package]]
+name = "tflite"
+version = "2.18.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "flatbuffers" },
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/93/0e/186beaed34ce9a740d7add374118b206fac75631c94bb4fa72d63ec32f7f/tflite-2.18.0.tar.gz", hash = "sha256:07e9478e0d0fb4d3082d0ce8e7e6eab4a90a7174412faec7702e24bfcbf4190d", size = 49232, upload-time = "2025-01-28T11:32:59.034Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/db/9b/f35d52989cb458a911f1ed4164b37dcf6559237b73c962c09ed0b6cecd4f/tflite-2.18.0-py2.py3-none-any.whl", hash = "sha256:a49a4316530377c597bb272176c12d5d3c4453640118b068c93a8c3cc6c5c2c1", size = 153155, upload-time = "2025-01-28T11:32:57.201Z" },
 ]
 
 [[package]]
