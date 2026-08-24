@@ -2,8 +2,7 @@ import os
 
 import fire
 
-from declearn.test_utils import make_importable
-from declearn.utils import run_as_processes
+from declearn.utils import make_importable, run_as_processes
 
 with make_importable(os.path.dirname(__file__)):
     from prepare_data import prepare_mitbih
