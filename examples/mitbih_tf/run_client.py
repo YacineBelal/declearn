@@ -60,7 +60,7 @@ def run_client(
         information.
     """
 
-    declearn.utils.set_device_policy(gpu=True)
+    declearn.utils.set_device_policy(gpu=False)
 
     stamp = datetime.datetime.now().strftime("%y-%m-%d_%H-%M")
     checkpoint = os.path.join(FILEDIR, f"result_{stamp}", client_name)

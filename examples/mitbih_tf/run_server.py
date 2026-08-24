@@ -26,7 +26,7 @@ def run_server(
     host: str = "localhost",
     port: int = 8765,
 ) -> None:
-    declearn.utils.set_device_policy(gpu=True)
+    declearn.utils.set_device_policy(gpu=False)
     metrics = declearn.metrics.MetricSet(
         [
             declearn.metrics.MulticlassAccuracyPrecisionRecall(

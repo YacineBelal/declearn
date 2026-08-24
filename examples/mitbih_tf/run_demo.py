@@ -12,7 +12,7 @@ with make_importable(os.path.dirname(__file__)):
 
 
 def run_demo(
-    nb_clients: int = 1,  # Note that this number matches the AAMI dataset split, which results in 22 training clients.
+    nb_clients: int = 22,  # Note that this number matches the AAMI dataset split, which results in 22 training clients.
 ) -> None:
     data_folder = prepare_mitbih()
     server = (run_server, {"nb_clients": nb_clients})
