@@ -60,7 +60,7 @@ all = [
     "protobuf >= 3.19",
     "tensorflow>=2.20.0",
     "keras~=3.15.0",
-    "tflite>=2.18.0",
+    "ai-edge-litert~=2.2.0",
     "torch ~= 2.0",
     "websockets >= 10.1, < 14.0",
 ]
@@ -82,7 +82,7 @@ haiku = [
 tensorflow = [
     "tensorflow>=2.20.0",
     "keras~=3.15.0",
-    "tflite >= 2.18.0",
+    "ai-edge-litert~=2.2.0",
 ]
 torch = [
     "torch ~= 2.0",
