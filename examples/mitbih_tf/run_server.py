@@ -57,7 +57,9 @@ def run_server(
 
     from tensorflow import TensorShape
 
-    model._model.build(input_shape=[TensorShape([None, 1,64]), TensorShape([None, 4])])
+    model._model.build(
+        input_shape=[TensorShape([None, 64, 1]), TensorShape([None, 4])]
+    )
 
     aggregator = declearn.aggregator.AveragingAggregator(steps_weighted=False)
 

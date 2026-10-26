@@ -65,6 +65,8 @@ def run_client(
     data_folder = os.path.join(FILEDIR, data_folder, client_name)
 
     X_train = load_data_array(os.path.join(data_folder, "train_data.npy"))
+    X_train = np.transpose(X_train, axes=(0, 2, 1))
+
     RR_train = load_data_array(os.path.join(data_folder, "train_arr.npy"))
     y_train = load_data_array(os.path.join(data_folder, "train_target.npy"))
 
@@ -78,6 +80,8 @@ def run_client(
 
     train = TensorflowDataset(tf_dataset_train, seed=42)
     X_test = load_data_array(os.path.join(data_folder, "valid_data.npy"))
+    X_test = np.transpose(X_test, axes=(0, 2, 1))
+
     RR_test = load_data_array(os.path.join(data_folder, "valid_arr.npy"))
     y_test = load_data_array(os.path.join(data_folder, "valid_target.npy"))
 
