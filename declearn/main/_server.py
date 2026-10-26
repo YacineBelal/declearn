@@ -1124,7 +1124,6 @@ class FederatedServer:
             self.model.set_weights(message.weights, trainable=True)
             self.ckptr.save_model(self.model, timestamp="best")
 
-    # TODO: or here? do we need both of these anyway?
     def adversarial_round(
         self,
         round_i: int,
