@@ -8,7 +8,7 @@ requires = [
 
 [project]
 name = "declearn"
-version = "2.8.0"
+version = "2.9.1"
 description = "A modular and extensible framework for Federated Learning."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -17,10 +17,12 @@ authors = [
     {name = "Paul Andrey", email = "paul.andrey@inria.fr"},
     {name = "Nathan Bigaud", email = "nathan.bigaud@inria.fr"},
     {name = "Simon Decomble", email = "simon.decomble@inria.fr"},
+    {name = "Ikram Messadi", email = "ikram.messadi@inria.fr"},
 ]
 maintainers = [
     {name = "Paul Andrey", email = "paul.andrey@inria.fr"},
     {name = "Simon Decomble", email = "simon.decomble@inria.fr"},
+    {name = "Ikram Messadi", email = "ikram.messadi@inria.fr"},
 ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -115,7 +117,7 @@ nlp = [
 
 # Docs-building dependencies.
 docs = [
-    "griffe ~= 1.0",
+    "griffe ~= 2.0",
     "mkdocstrings[python] ~= 0.8",
     "mkdocs-autorefs ~= 0.4",
     "mkdocs-literate-nav ~= 0.4",
@@ -135,7 +137,7 @@ tests = [
 # All dev dependencies : lint, test, doc, build.
 dev = [
     "build>=1.3.0",
-    "griffe ~= 1.0",
+    "griffe ~= 2.0",
     "grpcio-tools>=1.78",
     "ipython>=9.8.0",
     "mkdocstrings[python] ~= 0.8",
@@ -157,7 +159,7 @@ dev = [
 # All dev dependencies : lint, test, doc, build.
 dev = [
     "build>=1.3.0",
-    "griffe ~= 1.0",
+    "griffe ~= 2.0",
     "ipython>=9.8.0",
     "mkdocstrings[python] ~= 0.8",
     "mkdocs-autorefs ~= 0.4",
