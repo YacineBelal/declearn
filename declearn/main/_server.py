@@ -170,6 +170,7 @@ class FederatedServer:
         self.client_sampler = self._parse_clisamp(
             client_sampler, logger=self.logger
         )
+        self.adversarial = optim.adversarial
         # Assign an optional checkpointer.
         if checkpoint is not None:
             checkpoint = Checkpointer.from_specs(checkpoint)
@@ -399,6 +400,8 @@ class FederatedServer:
                 await self.training_round(
                     round_i, config.training, clients_train
                 )
+
+                self.adversarial_round(round_i)
                 await self.evaluation_round(
                     round_i, config.evaluate, clients_eval
                 )
@@ -491,6 +494,13 @@ class FederatedServer:
             self.aggrg = await self.fairness.setup_fairness(
                 netwk=self.netwk, aggregator=self.aggrg, secagg=self._decrypter
             )
+
+        if self.adversarial is not None:
+            try:
+                self.adversarial.setup_adversarial(self.c_opt)
+            except Exception as e:
+                print(e)
+
         self.logger.info("Initialization was successful.")
 
     async def _require_and_process_data_info(
@@ -1113,3 +1123,25 @@ class FederatedServer:
             self.logger.info("Checkpointing final weights under %s.", path)
             self.model.set_weights(message.weights, trainable=True)
             self.ckptr.save_model(self.model, timestamp="best")
+
+    # TODO: or here? do we need both of these anyway?
+    def adversarial_round(
+        self,
+        round_i: int,
+    ) -> None:
+
+        if self.adversarial is None:
+            return
+
+        self.logger.info("Initiating adversarial round %s", round_i)
+
+        metrics = self.adversarial.run_adversarial_round(
+            self.model, self.c_opt
+        )
+
+        if self.ckptr is not None:
+            self.ckptr.save_metrics(
+                metrics=metrics,
+                prefix="adversarial_metrics",
+                timestamp=f"round_{round_i}",
+            )
