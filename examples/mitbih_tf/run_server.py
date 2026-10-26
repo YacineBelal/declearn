@@ -23,7 +23,7 @@ FILEDIR = os.path.dirname(os.path.abspath(__file__))
 def run_server(
     nb_clients: int,
     protocol: str = "websockets",
-    host: str = "localhost",
+    host: str = "localhost",  # 0.0.0.0 for orchestra deployment
     port: int = 8765,
 ) -> None:
     declearn.utils.set_device_policy(gpu=False)
@@ -110,7 +110,7 @@ def run_server(
     evaluate = declearn.main.config.EvaluateConfig(
         batch_size=1024,
         shuffle=False,
-        frequency=10,
+        frequency=1000,
     )
 
     run_config = declearn.main.config.FLRunConfig.from_params(
