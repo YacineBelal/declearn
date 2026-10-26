@@ -21,6 +21,7 @@ import dataclasses
 import functools
 from typing import Any, Dict, Optional, Union
 
+from declearn.adversarial.api import AdversarialControllerServer
 from declearn.aggregator import Aggregator, AveragingAggregator
 from declearn.fairness.api import FairnessControllerServer
 from declearn.optimizer import Optimizer
@@ -101,6 +102,8 @@ class FLOptimConfig(TomlConfig):
         default_factory=AveragingAggregator
     )
     fairness: Optional[FairnessControllerServer] = None
+
+    adversarial: Optional[AdversarialControllerServer] = None
 
     @classmethod
     def parse_client_opt(
@@ -229,3 +232,16 @@ class FLOptimConfig(TomlConfig):
                     )
             return FairnessControllerServer.from_specs(**inputs)
         raise TypeError("Unsupported inputs type for field 'fairness.")
+
+    @classmethod
+    def parse_adversary(
+        cls,
+        field: dataclasses.Field[AdversarialControllerServer],
+        inputs: Union[Dict[str, Any], AdversarialControllerServer, None],
+    ) -> AdversarialControllerServer:
+
+        if inputs is None:
+            return cls.default_parser(field, inputs)
+        if isinstance(inputs, AdversarialControllerServer):
+            return inputs
+        # TODO if dict is provided, to be done once keys are known
