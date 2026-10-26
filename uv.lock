@@ -1054,10 +1054,12 @@ dependencies = [
     { name = "gmpy2" },
     { name = "grpcio" },
     { name = "msgpack" },
+    { name = "opacus" },
     { name = "pandas" },
     { name = "requests" },
     { name = "scikit-learn" },
     { name = "tqdm" },
+    { name = "websockets" },
     { name = "wfdb" },
 ]
 
@@ -1211,6 +1213,7 @@ requires-dist = [
     { name = "msgpack", specifier = ">=1.1.2" },
     { name = "mypy", marker = "extra == 'dev'", specifier = "~=1.0" },
     { name = "mypy", marker = "extra == 'tests'", specifier = "~=1.0" },
+    { name = "opacus", specifier = ">=1.6.0" },
     { name = "opacus", marker = "extra == 'all'", specifier = "~=1.4" },
     { name = "opacus", marker = "extra == 'dp'", specifier = "~=1.4" },
     { name = "pandas", specifier = ">=1.2,<3.0" },
@@ -1239,6 +1242,7 @@ requires-dist = [
     { name = "tox", marker = "extra == 'tests'", specifier = "~=4.31" },
     { name = "tqdm", specifier = "~=4.62" },
     { name = "transformers", marker = "extra == 'nlp'", specifier = "~=4.57" },
+    { name = "websockets", specifier = ">=13.1" },
     { name = "websockets", marker = "extra == 'all'", specifier = ">=10.1,<14.0" },
     { name = "websockets", marker = "extra == 'websockets'", specifier = ">=10.1,<14.0" },
     { name = "wfdb", specifier = ">=4.3.1" },

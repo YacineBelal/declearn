@@ -41,10 +41,12 @@ dependencies = [
     "gmpy2 ~= 2.1",
     "grpcio>=1.83.0",
     "msgpack>=1.1.2",
+    "opacus>=1.6.0",
     "pandas >= 1.2, < 3.0",
     "requests ~= 2.18",
     "scikit-learn ~= 1.6",
     "tqdm ~= 4.62",
+    "websockets>=13.1",
     "wfdb>=4.3.1",
 ]
 
